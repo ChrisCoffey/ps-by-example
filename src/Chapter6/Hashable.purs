@@ -1,16 +1,16 @@
 module Chapter6.Hashable where
 
 import Prelude
-
-import Data.Char (toCharCode)
 import Data.Array
+import Data.Char (toCharCode)
 import Data.Either (Either(..))
-import Data.Foldable (foldl, foldr, foldMap, class Foldable)
+import Data.Foldable (maximum, foldl, foldr, foldMap, class Foldable)
 import Data.Function (on)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (class Monoid)
 import Data.String (toCharArray)
 import Data.Tuple (Tuple(..))
+import Partial.Unsafe (unsafePartial)
 
 
 newtype Complex = Complex {real :: Number, imaginary :: Number}
@@ -65,5 +65,78 @@ class Monoid m <= Action m a where
 
 --The Action laws should treat mEmpty as not modifying the element at all.
 
-instance Action m a => Action m (Array a) where
-    act m arr = 
+instance arAction :: Action m a => Action m (Array a) where
+    act m as = map (act m) as
+
+newtype Self m = Self m
+
+instance selfAppend :: Action m a => Action m (Self m) where
+    act m (Self x) = Self (m <> x)
+
+maxOfArray :: Partial => Array Int -> Int
+maxOfArray arr = unsafePartial dirtyMax arr
+    where 
+        dirtyMax as = case maximum as of
+                           Nothing -> 0
+                           Just m -> m
+
+--- The hashing library
+
+
+newtype HashCode = HashCode Int
+instance hashEq :: Eq HashCode where
+    eq (HashCode a) (HashCode a') = eq a a'
+
+hashcode :: Int -> HashCode
+hashcode h = HashCode (h `mod` 65535)
+
+--Assumes that if a==b then hash(a)==hash(b)
+class Eq a <= Hashable a where
+    hash :: a -> HashCode
+
+combineHashes :: HashCode -> HashCode -> HashCode
+combineHashes (HashCode a) (HashCode b) = hashcode (73 * a + 51 * b)
+
+equalHash :: forall a. Hashable a => a -> a -> Boolean
+equalHash = eq `on` hash
+
+instance hashInt :: Hashable Int where
+    hash = hashcode
+
+instance hashBool :: Hashable Boolean where
+    hash false = hashcode 0
+    hash true  = hashcode 1
+
+instance hashChar :: Hashable Char where
+    hash = hashcode <<< toCharCode
+
+instance hashArray :: Hashable a => Hashable (Array a) where
+    hash = foldl combineHashes (HashCode 0) <<< map hash
+
+instance hashString :: Hashable String where
+    hash = hash <<< toCharArray
+
+elem :: forall a. Eq a =>  a -> Array a -> Boolean
+elem a arr = case elemIndex a arr of
+                Nothing -> false
+                _       -> true
+
+hashEqual :: forall a. Hashable a => Array a -> Array a -> Boolean
+hashEqual l r = 
+    if null <<< nubBy equalHash $ l' <> r'
+        then false
+        else foldl (\b a -> b || elem a r) false l
+    where
+        l' = nubBy equalHash l
+        r' = nubBy equalHash r
+
+newtype Hour = Hour Int
+
+instance eqHour :: Eq Hour where
+    eq (Hour n) (Hour m) = mod n 12 == mod m 12
+
+--Only trick is to make sure we keep the modular arithmetic
+instance hashableHour :: Hashable Hour where
+    hash (Hour n) = hash (mod n 12)
+
+
