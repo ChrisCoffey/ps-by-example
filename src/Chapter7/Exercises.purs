@@ -51,3 +51,4 @@ notEmptyRegex = unsafePartial case regex ".*\\S.*" noFlags of
 
 nonWhitespace :: String -> String -> V Errors Unit
 nonWhitespace field = matches field notEmptyRegex 
+
