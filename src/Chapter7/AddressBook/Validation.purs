@@ -1,10 +1,9 @@
 module Chapter7.AddressBook.Validation where
 
 import Prelude
-
-import Chapter7.AddressBook (Address(..), Person(..), PhoneNumber(..),
-                         address, person, phoneNumber)
+import Chapter7.AddressBook (Address(..), Person(..), PhoneNumber(..), address, person, phoneNumber)
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(Just))
 import Data.String (length)
 import Data.String.Regex (Regex, test, noFlags, regex)
 import Data.Traversable (traverse)
@@ -50,7 +49,7 @@ validatePerson :: Person -> V Errors Person
 validatePerson (Person o) =
   person <$> (nonEmpty "First Name" o.firstName *> pure o.firstName)
          <*> (nonEmpty "Last Name"  o.lastName  *> pure o.lastName)
-         <*> validateAddress o.homeAddress
+         <*> traverse validateAddress o.homeAddress
          <*> (arrayNonEmpty "Phone Numbers" o.phones *> traverse validatePhoneNumber o.phones)
 
 validatePerson' :: Person -> Either Errors Person

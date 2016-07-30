@@ -1,14 +1,14 @@
 module Chapter7.Exercises where
 
 import Prelude
-
 import Chapter7.AddressBook
 import Chapter7.AddressBook.Validation
-
-import Control.Apply (lift2)
-import Data.Either(Either(..))
-import Data.Maybe (Maybe(..))
 import Data.String.Regex
+import Control.Apply (lift2, lift3)
+import Data.Either (Either(..))
+import Data.Foldable (foldMap, foldl, foldr, class Foldable)
+import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse, class Traversable)
 import Data.Validation.Semigroup (V)
 import Partial.Unsafe (unsafePartial)
 
@@ -51,4 +51,27 @@ notEmptyRegex = unsafePartial case regex ".*\\S.*" noFlags of
 
 nonWhitespace :: String -> String -> V Errors Unit
 nonWhitespace field = matches field notEmptyRegex 
+
+data Tree a = Leaf a | Branch (Tree a) a (Tree a)
+
+instance treeFunctor :: Functor Tree where
+    map f (Leaf a) = Leaf $ f a
+    map f (Branch l a r) = Branch (map f l) (f a) (map f r)
+
+instance treeFoldable :: Foldable Tree where
+    foldr f z (Leaf a) = f a z
+    foldr f z (Branch l a r) = foldr f (f a r') l
+        where r' = foldr f z r
+    
+    foldl f z (Leaf a) = f z a
+    foldl f z (Branch l a r) = foldl f (f (foldl f z l) a) r
+    
+    foldMap f (Leaf a) = f a
+    foldMap f (Branch l a r) = foldMap f l <> f a <> foldMap f r
+
+instance treeTraversable :: Traversable Tree  where
+    traverse f (Leaf a) = Leaf <$> f a
+    traverse f (Branch l a r) = Branch <$> traverse f l <*> f a <*> traverse f r
+    sequence = traverse id
+
 
