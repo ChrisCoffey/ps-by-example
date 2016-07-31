@@ -8,10 +8,12 @@
   ],
   "dependencies": {
     "purescript-console": "^1.0.0",
+    "purescript-control": "*",
+    "purescript-exceptions": "*",
     "purescript-math": "^2.0.0",
     "purescript-globals": "^1.0.0",
     "purescript-lists": "^1.0.1",
-    "purescript-control": "*",
+    "purescript-random": "*",
     "purescript-validation": "*"
   },
   "devDependencies": {
