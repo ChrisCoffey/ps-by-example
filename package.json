@@ -1,0 +1,27 @@
+{
+  "name": "pux_issues",
+  "version": "1.0.0",
+  "description": "Learning Purescrit",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+        "react": "^0.14.8",
+        "react-dom": "^0.14.6" 
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChrisCoffey/ps-by-example.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChrisCoffey/ps-by-example/issues"
+  },
+  "homepage": "https://github.com/ChrisCoffey/ps-by-example#readme"
+}

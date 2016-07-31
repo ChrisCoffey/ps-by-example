@@ -7,13 +7,18 @@
     "output"
   ],
   "dependencies": {
+    "purescript-canvas": "*",
     "purescript-console": "^1.0.0",
     "purescript-control": "*",
+    "purescript-dom": "*",
     "purescript-exceptions": "*",
     "purescript-math": "^2.0.0",
     "purescript-globals": "^1.0.0",
     "purescript-lists": "^1.0.1",
     "purescript-random": "*",
+    "purescript-refs": "*",
+    "purescript-react": "*",
+    "purescript-react-dom": "*",
     "purescript-validation": "*"
   },
   "devDependencies": {
