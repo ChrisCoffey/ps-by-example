@@ -2,11 +2,14 @@ module Chapter9.Exercises where
 
 import Prelude
 import Math as Math
+import Chapter9.DOM.Eff (addEventListener, querySelector)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (log)
+import Control.Monad.Eff.Random (randomInt, random)
 import Data.Array (range, (..))
 import Data.Array.Partial (tail, head)
-import Data.Int (toNumber)
+import Data.Foldable (for_)
+import Data.Int (hexadecimal, toStringAs, toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
 import Graphics.Canvas (strokePath, Context2D, setStrokeStyle, CANVAS, closePath, lineTo, moveTo, fillPath, setFillStyle, arc, rect, getContext2D, getCanvasElementById)
@@ -28,7 +31,7 @@ renderPath ctx pts = fillPath ctx $ do
 unChanged n = {x: n * 100.0, y: n * 25.0}
 interesting n = {x: n + 4.0, y: 150.0 + (100.0 * sin n)}
 
-main = void $ unsafePartial do
+pointSampleF = void $ unsafePartial do
     Just canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
 
@@ -41,4 +44,40 @@ main = void $ unsafePartial do
     log "Done rendering points"
    
     renderPath ctx <<< map interesting <<< map toNumber $ 1..500
+
+
+circlesOnClick ctx = do 
+    setStrokeStyle "#000000" ctx
+    fillPath ctx $ rect ctx {x: 0.0,y: 0.0, w: 0.0, h: 0.0}
+    
+    for_ (1 .. 100) \_ -> do
+        x <- random
+        y <- random
+        r <- random
+        r' <- randomInt 0 255
+        g <- randomInt 0 255
+        b <- randomInt 0 255
+        let cString = (toStringAs hexadecimal r') <>
+                      (toStringAs hexadecimal g) <>
+                      (toStringAs hexadecimal b)
+        setFillStyle ("#"<>cString) ctx
+        strokeAndFill ctx $ arc ctx
+            { x     : x * 600.0
+            , y     : y * 600.0
+            , r     : r * 50.0
+            , start : 0.0
+            , end   : Math.pi * 2.0
+            }
+
+main = void $ unsafePartial do
+    Just canvas <- getCanvasElementById "canvas"
+    ctx <- getContext2D canvas
+    node <- querySelector "#canvas"
+    for_ node $ addEventListener "click" $ void do
+        circlesOnClick ctx
+
+
+strokeAndFill ctx path = do
+    fillPath ctx path
+    strokePath ctx path
 
