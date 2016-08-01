@@ -12,7 +12,7 @@ import Data.Foldable (for_)
 import Data.Int (hexadecimal, toStringAs, toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
-import Graphics.Canvas (strokePath, Context2D, setStrokeStyle, CANVAS, closePath, lineTo, moveTo, fillPath, setFillStyle, arc, rect, getContext2D, getCanvasElementById)
+import Graphics.Canvas (rotate, translate, strokePath, Context2D, setStrokeStyle, CANVAS, closePath, lineTo, moveTo, fillPath, setFillStyle, arc, rect, getContext2D, getCanvasElementById)
 import Math (sin, cos)
 import Partial.Unsafe (unsafePartial)
 
@@ -69,12 +69,17 @@ circlesOnClick ctx = do
             , end   : Math.pi * 2.0
             }
 
+rotateAround ctx point = do
+    translate {translateX: 0.0, translateY: 0.0} ctx
+    rotate 1.0 ctx
+
 main = void $ unsafePartial do
     Just canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
     node <- querySelector "#canvas"
     for_ node $ addEventListener "click" $ void do
         circlesOnClick ctx
+        rotateAround ctx {x: 0.0, y: 0.0}
 
 
 strokeAndFill ctx path = do
