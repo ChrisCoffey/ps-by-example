@@ -2,13 +2,11 @@ module Chapter9.Examples.LSystems where
 
 
 import Prelude
-
-import Data.Maybe (Maybe(..))
-import Data.Array (concatMap, foldM)
-import Control.Monad.Eff (Eff)
-import Graphics.Canvas (CANVAS, strokePath, setStrokeStyle, lineTo, moveTo,
-                        getContext2D, getCanvasElementById)
 import Math as Math
+import Control.Monad.Eff (Eff)
+import Data.Array (concatMap, foldM)
+import Data.Maybe (Maybe(..))
+import Graphics.Canvas (closePath, fillPath, CANVAS, strokePath, setStrokeStyle, lineTo, moveTo, getContext2D, getCanvasElementById)
 import Partial.Unsafe (unsafePartial)
 
 lsystem :: forall a m s. Monad m =>
@@ -22,7 +20,7 @@ lsystem init prod interpret n state = go init n
   go s 0 = foldM interpret state s
   go s n = go (concatMap prod s) (n - 1)
 
-data Alphabet = L | R | F
+data Alphabet = L | R | F | M
 
 type Sentence = Array Alphabet
 
@@ -39,26 +37,28 @@ main = void $ unsafePartial do
 
   let
     initial :: Sentence
-    initial = [F, R, R, F, R, R, F, R, R]
+    initial = [M]
 
     productions :: Alphabet -> Sentence
     productions L = [L]
     productions R = [R]
-    productions F = [F, L, F, R, R, F, L, F]
+    productions F = [F, L, M, L, F, R, M, R, F, R, M, R, F, L, M, L, F]
+    productions M = [M, R, F, R, M, L, F, L, M, L, F, L, M, R, F, R, M]
 
     interpret :: State -> Alphabet -> Eff (canvas :: CANVAS) State
     interpret state L = pure $ state { theta = state.theta - Math.pi / 3.0 }
     interpret state R = pure $ state { theta = state.theta + Math.pi / 3.0 }
-    interpret state F = do
+    interpret state _ = do
       let x = state.x + Math.cos state.theta * 1.5
           y = state.y + Math.sin state.theta * 1.5
-      moveTo ctx state.x state.y
       lineTo ctx x y
       pure { x, y, theta: state.theta }
 
     initialState :: State
-    initialState = { x: 120.0, y: 200.0, theta: 0.0 }
+    initialState = { x: 120.0, y: 200.0, theta: 0.4 }
 
   setStrokeStyle "#000000" ctx
 
-  strokePath ctx $ lsystem initial productions interpret 5 initialState
+  moveTo ctx initialState.x initialState.y
+  fillPath ctx $ lsystem initial productions interpret 4 initialState
+  closePath ctx
