@@ -7,3 +7,8 @@ exports.alert = function(msg) {
     };
 };
 
+exports.confirm = function(msg) {
+    return function (){
+        return window.confirm(msg); 
+    };
+};
