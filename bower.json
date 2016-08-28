@@ -12,6 +12,7 @@
     "purescript-console": "^1.0.0",
     "purescript-control": "*",
     "purescript-dom": "^1.0.0",
+    "uurescript-free": "*",
     "purescript-exceptions": "*",
     "purescript-foreign": "*",
     "purescript-globals": "^1.0.0",
